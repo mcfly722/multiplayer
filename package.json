@@ -1,0 +1,17 @@
+{
+  "name": "client.web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "start": "go run main.go"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "path": "^0.12.7",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.3.12"
+  }
+}
