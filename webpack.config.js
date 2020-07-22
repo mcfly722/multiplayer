@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-
 const path = require('path')
+
+var webpack = require('webpack');
 
 module.exports = {
   entry: {
@@ -11,6 +12,12 @@ module.exports = {
     path: __dirname + '/static'
   },
   plugins: [
-    new HtmlWebpackPlugin()
+    new HtmlWebpackPlugin({
+      title: 'multiplayer'
+    }),
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery"
+    })
   ]
 }
