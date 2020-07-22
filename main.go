@@ -52,7 +52,7 @@ func main() {
 	http.HandleFunc("/api/login", login)
 	http.Handle("/api/movement", isAuthorized(movement))
 
-	log.Printf("starting server at %v (session key:%v)", bindingAddress, mySigningKey)
+	log.Printf("starting server at %v (session key:%s)", bindingAddress, mySigningKey)
 	log.Fatal(http.ListenAndServe(bindingAddress, nil))
 }
 
