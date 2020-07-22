@@ -8,7 +8,7 @@ module.exports = {
     app: './index.js'
   },
   output: {
-    filename: 'index_bundle.js',
+    filename: 'index_bundle_[contenthash].js',
     path: __dirname + '/static'
   },
   plugins: [

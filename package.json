@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --mode production",
-    "start": "go run main.go"
+    "build": "webpack --mode development",
+    "start": "go run ."
   },
   "author": "",
   "license": "MIT",

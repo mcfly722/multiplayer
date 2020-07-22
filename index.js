@@ -5,11 +5,10 @@ $.ajax({
   url: "api/login",
 }).done(function(data) {
   token = data;
-  //token = jwtDecode(data);
+  playerId = jwtDecode(data).Id;
   startGame()
 });
 
-var token;
 
 var actualKeys = {
   'ArrowUp':false,
@@ -36,6 +35,9 @@ function updateMovements(){
     console.log("updated to "+JSON.stringify(serverKeys));
   }
 }
+
+var playerId;
+var token;
 
 function startGame() {
 

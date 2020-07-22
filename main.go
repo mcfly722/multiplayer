@@ -11,8 +11,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-var mySigningKey string
-var lastUserID float64
+var mySigningKey []byte
 
 func isAuthorized(endpoint func(float64, http.ResponseWriter, *http.Request)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -43,9 +42,9 @@ func isAuthorized(endpoint func(float64, http.ResponseWriter, *http.Request)) ht
 }
 
 func main() {
-
 	rand.Seed(time.Now().UnixNano())
-	mySigningKey := randomString(32)
+
+	mySigningKey = []byte(randomString(32))
 
 	var bindingAddress = "localhost:8080"
 
@@ -60,17 +59,17 @@ func main() {
 func login(w http.ResponseWriter, r *http.Request) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["Id"] = lastUserID
+	playerID := NewPlayer()
+	log.Printf("new player created id=%v", playerID)
+
+	claims["Id"] = playerID
 	claims["Exp"] = time.Now().Add(time.Hour * 24).Unix()
 
 	tokenString, err := token.SignedString(mySigningKey)
-
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
-		log.Printf("new user entered id=%v", lastUserID)
-		lastUserID++
 		w.Write([]byte(tokenString))
 	}
 }
@@ -83,15 +82,6 @@ func randomString(n int) string {
 		b[i] = letter[rand.Intn(len(letter))]
 	}
 	return string(b)
-}
-
-// Movement - pressed buttons on client
-type Movement struct {
-	ArrowUp    bool
-	ArrowDown  bool
-	ArrowLeft  bool
-	ArrowRight bool
-	Space      bool
 }
 
 func movement(id float64, w http.ResponseWriter, r *http.Request) {
