@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-var mySigningKey = []byte("my_supper_pupper_secret_phase")
+var mySigningKey string
 var lastUserID float64
 
 func isAuthorized(endpoint func(float64, http.ResponseWriter, *http.Request)) http.Handler {
@@ -31,14 +32,6 @@ func isAuthorized(endpoint func(float64, http.ResponseWriter, *http.Request)) ht
 
 			if token.Valid {
 				endpoint((token.Claims.(jwt.MapClaims))["Id"].(float64), w, r)
-				/*
-					id, err := strconv.Atoi((token.Claims.(jwt.MapClaims))["Id"].(string))
-					if err != nil {
-						w.WriteHeader(http.StatusUnauthorized)
-						fmt.Fprintf(w, err.Error())
-					} else {
-					}
-				*/
 			} else {
 				w.WriteHeader(http.StatusUnauthorized)
 			}
@@ -50,13 +43,17 @@ func isAuthorized(endpoint func(float64, http.ResponseWriter, *http.Request)) ht
 }
 
 func main() {
+
+	rand.Seed(time.Now().UnixNano())
+	mySigningKey := randomString(32)
+
 	var bindingAddress = "localhost:8080"
 
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/api/login", login)
 	http.Handle("/api/movement", isAuthorized(movement))
 
-	log.Printf("starting server at %v", bindingAddress)
+	log.Printf("starting server at %v (session key:%v)", bindingAddress, mySigningKey)
 	log.Fatal(http.ListenAndServe(bindingAddress, nil))
 }
 
@@ -76,6 +73,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 		lastUserID++
 		w.Write([]byte(tokenString))
 	}
+}
+
+func randomString(n int) string {
+	var letter = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letter[rand.Intn(len(letter))]
+	}
+	return string(b)
 }
 
 // Movement - pressed buttons on client
