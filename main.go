@@ -51,8 +51,10 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/api/login", login)
 	http.Handle("/api/movement", isAuthorized(movement))
+	http.Handle("/api/state", isAuthorized(state))
 
 	log.Printf("starting server at %v (session key:%s)", bindingAddress, mySigningKey)
+	go PlayGame()
 	log.Fatal(http.ListenAndServe(bindingAddress, nil))
 }
 
@@ -93,6 +95,16 @@ func movement(id float64, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	ApplyPlayerMovement(int(id), movement)
+	//	log.Printf("movement id=%v %+v", id, movement)
+}
 
-	log.Printf("movement id=%v %+v", id, movement)
+func state(id float64, w http.ResponseWriter, r *http.Request) {
+	jsonString, err := json.Marshal(Players)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		w.Write([]byte(jsonString))
+	}
 }
