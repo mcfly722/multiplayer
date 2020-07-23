@@ -18,19 +18,21 @@ function Game() {
     token = data;
     playerId = jwtDecode(token).Id;
     controller = new Controller(token);
-    display = new Display();
+    display = new Display(320, 200);
+    display.resize();
     setInterval(update, 1000);
   });
 
 
   function update() {
+
     $.ajax({
       type: "GET",
       url: "api/state",
       headers: { Token: token }
     }).done(function(data) {
       this.state = JSON.parse(data)
-      console.log(data)
+
     });
   }
 

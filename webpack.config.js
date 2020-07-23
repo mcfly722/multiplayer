@@ -11,6 +11,10 @@ module.exports = {
     filename: 'index_bundle_[contenthash].js',
     path: __dirname + '/static'
   },
+  watch: true,
+  watchOptions: {
+    aggregateTimeout: 300
+  },
   plugins: [
     new HtmlWebpackPlugin({
       title: 'multiplayer'
