@@ -19,7 +19,7 @@ function Game() {
       token = data;
       playerId = jwtDecode(token).Id;
       controller = new Controller(token);
-      display = new Display(320, 200);
+      display = new Display(480, 300);
       display.resize();
       setInterval(update, 1000);
       reloginRequired = false;

@@ -23,7 +23,7 @@ var lastPlayerID int
 
 // SafeWorld - protected with mutex world
 type SafeWorld struct {
-	MapName    string
+	Scene      string
 	Players    map[int]Player
 	playersMux sync.Mutex
 }
@@ -111,7 +111,7 @@ func PlayGame() {
 
 //GetSerializedWorld - return serialized players
 func GetSerializedWorld() ([]byte, error) {
-	safeWorld.MapName = "scene1.json"
+	safeWorld.Scene = "scene1.json"
 	safeWorld.playersMux.Lock()
 	result, err := json.Marshal(&safeWorld)
 	safeWorld.playersMux.Unlock()

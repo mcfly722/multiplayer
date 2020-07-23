@@ -1,42 +1,16 @@
 import $ from 'jquery';
+import {TileMaps} from './tileMaps.js';
+import {Images} from './images.js';
 
 const Display = function(width, height) {
 
-  var images = {};
+  var images = new Images();
+  var tileMaps = new TileMaps();
+
   var playerId,currentWorldState;
-
-  setInterval(loadRequestedImages, 1000);
-
-  function loadRequestedImages() {
-    Object.keys(images).forEach(function(key){
-      if (key in images) {
-        if (images[key].requested == false) {
-          images[key].img = new Image();
-          images[key].img.onload = function(data) {
-              images[key].ready = true;
-          };
-          images[key].img.src = key;
-          images[key].requesed = true;
-        }
-      }
-    })
-  }
-
-  function putImage(imageSrc,sx,sy,dx,dy,w,h){
-      if(imageSrc in images){
-        if (images[imageSrc].ready){
-          buffer.drawImage(images[imageSrc].img, sx,sy,w,h,dx,dy,w,h);
-        }
-      } else {
-        images[imageSrc] = {requested:false, ready:false}
-      }
-  }
-
-
 
   this.width  = width;
   this.height = height;
-
 
   $('body').css("background-color","gray").css("text-align","center");
 
@@ -55,13 +29,18 @@ const Display = function(width, height) {
 
 
   function renderHero() {
-    if (playerId !== undefined && currentWorldState !== undefined) {
+    if (playerId !== undefined) {
       var spriteSetNum = currentWorldState.Players[playerId].SpriteSetNum;
-      putImage('player'+spriteSetNum+'.png',0,0,160-16,100,32,32)
+      images.putImage(buffer,'player'+spriteSetNum+'.png',0,0,buffer.canvas.width/2-16,buffer.canvas.height/2,32,32)
     }
   }
 
   function renderScene() {
+
+    if (currentWorldState !== undefined){
+      tileMaps.putLayer(buffer,currentWorldState.Scene,"Layer1",0,0,0,0,buffer.canvas.width,canvas.height);
+    }
+
     buffer.fillStyle = "#101010";
     buffer.fillRect(0, 0, buffer.canvas.width, buffer.canvas.height);
     buffer.strokeStyle = "white"
@@ -103,6 +82,5 @@ const Display = function(width, height) {
   }
 
 }
-
 
 export {Display}
