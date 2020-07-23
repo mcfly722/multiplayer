@@ -36,7 +36,7 @@ func NewPlayer() int {
 	safeWorld.playersMux.Lock()
 
 	safeWorld.players[lastPlayerID] = Player{
-		SpriteSetNum: rand.Intn(3),
+		SpriteSetNum: rand.Intn(2),
 		X:            (float32)(rand.Intn(200) - 100),
 		Y:            (float32)(rand.Intn(200) - 100),
 		SpeedX:       0,

@@ -10,8 +10,6 @@ function Game() {
   var display;
   var token;
 
-  var state;
-
   var reloginRequired = true;
 
   function login(){
@@ -36,7 +34,6 @@ function Game() {
       }
   }
 
-
   function update() {
     if(!reloginRequired) {
       $.ajax({
@@ -44,7 +41,7 @@ function Game() {
         url: "api/state",
         headers: { Token: token }
       }).done(function(data) {
-        this.state = JSON.parse(data)
+        display.applyNewState(playerId, JSON.parse(data));
       }).fail(function(jqXHR){
         if(jqXHR.status == 401) {
           reloginRequired = true;

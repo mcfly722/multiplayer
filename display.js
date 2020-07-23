@@ -1,10 +1,42 @@
 import $ from 'jquery';
 
 const Display = function(width, height) {
+
+  var images = {};
+  var playerId,currentWorldState;
+
+  setInterval(loadRequestedImages, 1000);
+
+  function loadRequestedImages() {
+    Object.keys(images).forEach(function(key){
+      if (key in images) {
+        if (images[key].requested == false) {
+          images[key].img = new Image();
+          images[key].img.onload = function(data) {
+              images[key].ready = true;
+          };
+          images[key].img.src = key;
+          images[key].requesed = true;
+        }
+      }
+    })
+  }
+
+  function putImage(imageSrc,sx,sy,dx,dy,w,h){
+      if(imageSrc in images){
+        if (images[imageSrc].ready){
+          buffer.drawImage(images[imageSrc].img, sx,sy,w,h,dx,dy,w,h);
+        }
+      } else {
+        images[imageSrc] = {requested:false, ready:false}
+      }
+  }
+
+
+
   this.width  = width;
   this.height = height;
 
-  var currentState;
 
   $('body').css("background-color","gray").css("text-align","center");
 
@@ -21,6 +53,14 @@ const Display = function(width, height) {
 
   setInterval(renderScene, 1000);
 
+
+  function renderHero() {
+    if (playerId !== undefined && currentWorldState !== undefined) {
+      var spriteSetNum = currentWorldState[playerId].SpriteSetNum;
+      putImage('player'+spriteSetNum+'.png',0,0,160-16,100,32,32)
+    }
+  }
+
   function renderScene() {
     buffer.fillStyle = "#101010";
     buffer.fillRect(0, 0, buffer.canvas.width, buffer.canvas.height);
@@ -30,6 +70,9 @@ const Display = function(width, height) {
   };
 
   function render() {
+    renderScene();
+    renderHero();
+
     context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
   };
 
@@ -53,6 +96,13 @@ const Display = function(width, height) {
   this.handleResize = (event) => { this.resize(event); };
   window.addEventListener("resize",  this.handleResize);
 
+  this.applyNewState = function(playerId_, worldState_) {
+    console.log("apply new state")
+    playerId = playerId_;
+    currentWorldState = worldState_;
+  }
+
 }
+
 
 export {Display}
