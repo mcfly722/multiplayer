@@ -1,4 +1,4 @@
-package multiplayer
+package main
 
 import (
 	"math/rand"
