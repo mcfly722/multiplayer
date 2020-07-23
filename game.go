@@ -1,7 +1,9 @@
 package multiplayer
 
 import (
+	"encoding/json"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -19,13 +21,21 @@ type Player struct {
 
 var lastPlayerID int
 
+// SafeWorld - protected with mutex world
+type SafeWorld struct {
+	players    map[int]Player
+	playersMux sync.Mutex
+}
+
 // Players map
-var Players = map[int]Player{}
+var safeWorld = SafeWorld{players: make(map[int]Player)}
 
 // NewPlayer constructor
 func NewPlayer() int {
 
-	Players[lastPlayerID] = Player{
+	safeWorld.playersMux.Lock()
+
+	safeWorld.players[lastPlayerID] = Player{
 		SpriteSetNum: rand.Intn(3),
 		X:            (float32)(rand.Intn(200) - 100),
 		Y:            (float32)(rand.Intn(200) - 100),
@@ -33,6 +43,9 @@ func NewPlayer() int {
 		SpeedY:       0}
 
 	lastPlayerID++
+
+	safeWorld.playersMux.Unlock()
+
 	return lastPlayerID - 1
 }
 
@@ -47,7 +60,10 @@ type Movement struct {
 
 // ApplyPlayerMovement - change player speed
 func ApplyPlayerMovement(playerID int, movement Movement) {
-	if player, ok := Players[playerID]; ok {
+
+	safeWorld.playersMux.Lock()
+
+	if player, ok := safeWorld.players[playerID]; ok {
 		if movement.ArrowUp {
 			player.SpeedY = -1
 		}
@@ -67,19 +83,35 @@ func ApplyPlayerMovement(playerID int, movement Movement) {
 		if (!movement.ArrowLeft) && (!movement.ArrowRight) {
 			player.SpeedX = 0
 		}
-		Players[playerID] = player
+		safeWorld.players[playerID] = player
 	}
+
+	safeWorld.playersMux.Unlock()
+
 }
 
 // PlayGame - update scene
 func PlayGame() {
 	for {
-		for id, player := range Players {
+
+		safeWorld.playersMux.Lock()
+
+		for id, player := range safeWorld.players {
 			player.X += player.SpeedX
 			player.Y += player.SpeedY
-			Players[id] = player
+			safeWorld.players[id] = player
 		}
+
+		safeWorld.playersMux.Unlock()
+
 		time.Sleep(1000 / 60 * time.Millisecond)
 	}
+}
 
+//GetSerializedPlayers - return serialized players
+func GetSerializedPlayers() ([]byte, error) {
+	safeWorld.playersMux.Lock()
+	result, err := json.Marshal(safeWorld.players)
+	safeWorld.playersMux.Unlock()
+	return result, err
 }

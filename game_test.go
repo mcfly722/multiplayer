@@ -9,10 +9,17 @@ func TestPlayerRaceCondition(t *testing.T) {
 
 	go PlayGame()
 
+	go func() {
+		for i := 0; i < 10; i++ {
+			GetSerializedPlayers()
+		}
+	}()
+
 	for i := 0; i < 10; i++ {
 		var id = NewPlayer()
 
 		go func() {
+
 			for i := 0; i < 10; i++ {
 				ApplyPlayerMovement(id, Movement{
 					ArrowUp:    rand.Intn(2) == 0,

@@ -100,7 +100,7 @@ func movement(id float64, w http.ResponseWriter, r *http.Request) {
 }
 
 func state(id float64, w http.ResponseWriter, r *http.Request) {
-	jsonString, err := json.Marshal(Players)
+	jsonString, err := GetSerializedPlayers()
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusInternalServerError)
