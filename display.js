@@ -22,7 +22,6 @@ const Display = function(width, height) {
   setInterval(renderScene, 1000);
 
   function renderScene() {
-    console.log("renderScene")
     buffer.fillStyle = "#101010";
     buffer.fillRect(0, 0, buffer.canvas.width, buffer.canvas.height);
     buffer.strokeStyle = "white"
