@@ -1,4 +1,4 @@
-package main
+package multiplayer
 
 import (
 	"encoding/json"

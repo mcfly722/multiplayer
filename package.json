@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode development --watch",
-    "start": "go run ."
+    "start": "go run .",
+    "test" : "go test -race github.com\\mcfly722\\multiplayer"
   },
   "author": "",
   "license": "MIT",
