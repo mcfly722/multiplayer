@@ -6,9 +6,9 @@ const Display = function(width, height) {
 
   var currentState;
 
-  $('body').css("background-color","gray").css("align","center");
+  $('body').css("background-color","gray").css("text-align","center");
 
-  var c = $('<canvas/>').attr("id","canvas").css("image-rendering","pixelated")
+  var c = $('<canvas/>').attr("id","canvas").css("image-rendering","pixelated");
   $(document.body).append(c);
 
   var buffer  = document.createElement("canvas").getContext("2d")
