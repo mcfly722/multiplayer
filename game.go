@@ -23,19 +23,20 @@ var lastPlayerID int
 
 // SafeWorld - protected with mutex world
 type SafeWorld struct {
-	players    map[int]Player
+	MapName    string
+	Players    map[int]Player
 	playersMux sync.Mutex
 }
 
 // Players map
-var safeWorld = SafeWorld{players: make(map[int]Player)}
+var safeWorld = SafeWorld{Players: make(map[int]Player)}
 
 // NewPlayer constructor
 func NewPlayer() int {
 
 	safeWorld.playersMux.Lock()
 
-	safeWorld.players[lastPlayerID] = Player{
+	safeWorld.Players[lastPlayerID] = Player{
 		SpriteSetNum: rand.Intn(2),
 		X:            (float32)(rand.Intn(200) - 100),
 		Y:            (float32)(rand.Intn(200) - 100),
@@ -63,7 +64,7 @@ func ApplyPlayerMovement(playerID int, movement Movement) {
 
 	safeWorld.playersMux.Lock()
 
-	if player, ok := safeWorld.players[playerID]; ok {
+	if player, ok := safeWorld.Players[playerID]; ok {
 		if movement.ArrowUp {
 			player.SpeedY = -1
 		}
@@ -83,7 +84,7 @@ func ApplyPlayerMovement(playerID int, movement Movement) {
 		if (!movement.ArrowLeft) && (!movement.ArrowRight) {
 			player.SpeedX = 0
 		}
-		safeWorld.players[playerID] = player
+		safeWorld.Players[playerID] = player
 	}
 
 	safeWorld.playersMux.Unlock()
@@ -96,10 +97,10 @@ func PlayGame() {
 
 		safeWorld.playersMux.Lock()
 
-		for id, player := range safeWorld.players {
+		for id, player := range safeWorld.Players {
 			player.X += player.SpeedX
 			player.Y += player.SpeedY
-			safeWorld.players[id] = player
+			safeWorld.Players[id] = player
 		}
 
 		safeWorld.playersMux.Unlock()
@@ -108,10 +109,11 @@ func PlayGame() {
 	}
 }
 
-//GetSerializedPlayers - return serialized players
-func GetSerializedPlayers() ([]byte, error) {
+//GetSerializedWorld - return serialized players
+func GetSerializedWorld() ([]byte, error) {
+	safeWorld.MapName = "scene1.json"
 	safeWorld.playersMux.Lock()
-	result, err := json.Marshal(safeWorld.players)
+	result, err := json.Marshal(&safeWorld)
 	safeWorld.playersMux.Unlock()
 	return result, err
 }

@@ -56,7 +56,7 @@ const Display = function(width, height) {
 
   function renderHero() {
     if (playerId !== undefined && currentWorldState !== undefined) {
-      var spriteSetNum = currentWorldState[playerId].SpriteSetNum;
+      var spriteSetNum = currentWorldState.Players[playerId].SpriteSetNum;
       putImage('player'+spriteSetNum+'.png',0,0,160-16,100,32,32)
     }
   }

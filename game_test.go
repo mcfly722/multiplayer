@@ -11,7 +11,7 @@ func TestPlayerRaceCondition(t *testing.T) {
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			GetSerializedPlayers()
+			GetSerializedWorld()
 		}
 	}()
 
