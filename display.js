@@ -23,7 +23,7 @@ const Display = function(width, height) {
   buffer.canvas.width = width
   buffer.canvas.height = height
 
-  setInterval(render, 1000/30);
+  setInterval(render, 1000/60);
 
   setInterval(renderScene, 1000);
 
@@ -35,17 +35,24 @@ const Display = function(width, height) {
     }
   }
 
+  var a=0;
+
   function renderScene() {
-
-    if (currentWorldState !== undefined){
-      tileMaps.putLayer(buffer,currentWorldState.Scene,"Layer1",0,0,0,0,buffer.canvas.width,canvas.height);
-    }
-
     buffer.fillStyle = "#101010";
     buffer.fillRect(0, 0, buffer.canvas.width, buffer.canvas.height);
+
+    if (currentWorldState !== undefined){
+      a++;
+      var xx = Math.round(40+40*Math.sin(a/30))
+      var yy = Math.round(40+40*Math.cos(a/30))
+
+      tileMaps.putLayer(buffer,currentWorldState.Scene,"Layer1",0,0,xx,yy,buffer.canvas.width,canvas.height);
+    }
+
     buffer.strokeStyle = "white"
     buffer.lineWidth = 1
     buffer.strokeRect(10,10,width-20,height-20);
+
   };
 
   function render() {
