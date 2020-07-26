@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --mode development --watch",
     "start": "go run .",
-    "test": "go test -race github.com\\mcfly722\\multiplayer"
+    "test": "go test -race -v github.com\\mcfly722\\multiplayer"
   },
   "author": "",
   "license": "MIT",

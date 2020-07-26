@@ -1,27 +1,40 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"testing"
 )
 
 func TestPlayerRaceCondition(t *testing.T) {
+	world, err := NewWorld("scene1.json")
 
-	go PlayGame()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for {
+			world.Play()
+		}
+	}()
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			GetSerializedWorld()
+			world.Marshal()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}()
 
 	for i := 0; i < 10; i++ {
-		var id = NewPlayer()
+		var id = world.JoinNewPlayer()
 
 		go func() {
 
 			for i := 0; i < 10; i++ {
-				ApplyPlayerMovement(id, Movement{
+				world.ApplyPlayerMovement(id, Movement{
 					ArrowUp:    rand.Intn(2) == 0,
 					ArrowDown:  rand.Intn(2) == 0,
 					ArrowLeft:  rand.Intn(2) == 0,

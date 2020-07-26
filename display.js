@@ -30,6 +30,8 @@ const Display = function(width, height) {
 
   function renderHero() {
     if (playerId !== undefined) {
+      //console.log("world:"+JSON.stringify(currentWorldState))
+      //console.log("playerID:"+playerId)
       var spriteSetNum = currentWorldState.Players[playerId].SpriteSetNum;
       images.putImage(buffer,'player'+spriteSetNum+'.png',0,0,buffer.canvas.width/2-16,buffer.canvas.height/2,32,32)
     }
@@ -46,7 +48,8 @@ const Display = function(width, height) {
       var xx = Math.round(40+40*Math.sin(a/30))
       var yy = Math.round(40+40*Math.cos(a/30))
 
-      tileMaps.putLayer(buffer,currentWorldState.Scene,"Layer1",0,0,xx,yy,buffer.canvas.width,canvas.height);
+      tileMaps.putLayer(buffer,currentWorldState.SceneName,"Layer1",0,0,xx,yy,200,200);
+      tileMaps.putLayer(buffer,currentWorldState.SceneName,"Layer2",0,0,xx,yy,200,200);
     }
 
     buffer.strokeStyle = "white"

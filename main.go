@@ -41,6 +41,8 @@ func isAuthorized(endpoint func(float64, http.ResponseWriter, *http.Request)) ht
 	})
 }
 
+var currentWorld *World
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -53,15 +55,27 @@ func main() {
 	http.Handle("/api/movement", isAuthorized(movement))
 	http.Handle("/api/state", isAuthorized(state))
 
+	world, err := NewWorld("scene1.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	currentWorld = world
+
+	go func() {
+		for {
+			currentWorld.Play()
+			time.Sleep(1000 / 60 * time.Millisecond)
+		}
+	}()
+
 	log.Printf("starting server at %v (session key:%s)", bindingAddress, mySigningKey)
-	go PlayGame()
 	log.Fatal(http.ListenAndServe(bindingAddress, nil))
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	playerID := NewPlayer()
+	playerID := currentWorld.JoinNewPlayer()
 	log.Printf("new player created id=%v", playerID)
 
 	claims["Id"] = playerID
@@ -95,12 +109,12 @@ func movement(id float64, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	ApplyPlayerMovement(int(id), movement)
+	currentWorld.ApplyPlayerMovement(int(id), movement)
 	//	log.Printf("movement id=%v %+v", id, movement)
 }
 
 func state(id float64, w http.ResponseWriter, r *http.Request) {
-	jsonString, err := GetSerializedWorld()
+	jsonString, err := currentWorld.Marshal()
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusInternalServerError)

@@ -27,7 +27,7 @@ function Game() {
   }
 
   setInterval(checkThatLogined, 1000);
-
+  
   function checkThatLogined(){
       if (reloginRequired){
         login();
