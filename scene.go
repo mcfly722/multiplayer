@@ -6,14 +6,6 @@ import (
 	"os"
 )
 
-// TileSet - static TileSet
-type TileSet struct {
-	Columns    int
-	Image      string
-	TileHeight int
-	TileWidth  int
-}
-
 // TileObject - static Object on Scene Layer
 type TileObject struct {
 	ID     int
@@ -27,18 +19,14 @@ type TileObject struct {
 
 // Layer - static Scene Layer
 type Layer struct {
-	ID          int
-	Name        string
-	Compression string
-	Encoding    string
-	Data        string
-	objects     []TileObject
+	ID      int
+	Name    string
+	objects []TileObject
 }
 
 // Scene - static scene
 type Scene struct {
-	Layers   []Layer
-	Tilesets []TileSet
+	Layers []Layer
 }
 
 // NewScene constructor

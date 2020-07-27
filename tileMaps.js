@@ -42,8 +42,8 @@ const TileMaps = function() {
 
               //console.log("put sx1="+sx1+" sy1="+sy1+" sx2="+sx2+" sy2="+sy2);
 
-              for(var ix = sx1;ix<sx2;ix++){
-                for(var iy = sy1;iy<sy2;iy++){
+              for(var ix = sx1;ix<=sx2;ix++){
+                for(var iy = sy1;iy<=sy2;iy++){
 
                   var tile_n = (l['decompressedData'])[iy*l.width+ix]-1
                   var tile_ix = tile_n % tileSet.columns
@@ -61,8 +61,8 @@ const TileMaps = function() {
                   images.putImage(ctx,tileSet.image,
                     tile_ix * s.tilewidth,
                     tile_iy * s.tileheight,
-                    dx-tile_ax1+ix*s.tilewidth,
-                    dy-tile_ay1+iy*s.tileheight,
+                    dx+(ix-sx1)*s.tilewidth-tile_ax1,
+                    dy+(iy-sy1)*s.tileheight-tile_ay1,
                     s.tilewidth,
                     s.tileheight)
 

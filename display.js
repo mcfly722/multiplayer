@@ -4,10 +4,12 @@ import {Images} from './images.js';
 
 const Display = function(width, height) {
 
+  var camera;
+
   var images = new Images();
   var tileMaps = new TileMaps();
 
-  var playerId,currentWorldState;
+  var playerId, currentWorldState;
 
   this.width  = width;
   this.height = height;
@@ -28,12 +30,17 @@ const Display = function(width, height) {
   setInterval(renderScene, 1000);
 
 
-  function renderHero() {
-    if (playerId !== undefined) {
-      //console.log("world:"+JSON.stringify(currentWorldState))
-      //console.log("playerID:"+playerId)
-      var spriteSetNum = currentWorldState.Players[playerId].SpriteSetNum;
-      images.putImage(buffer,'player'+spriteSetNum+'.png',0,0,buffer.canvas.width/2-16,buffer.canvas.height/2,32,32)
+  function renderPlayers() {
+
+    for (var playerId in currentWorldState.Players){
+
+      var player = currentWorldState.Players[playerId]
+      var spriteSetNum = player.SpriteSetNum;
+
+      images.putImage(buffer,'player'+spriteSetNum+'.png',
+        0,0,
+        Math.round(player.X-camera.x+buffer.canvas.width/2),Math.round(player.Y-camera.y+buffer.canvas.height/2),
+        32,32)
     }
   }
 
@@ -43,14 +50,29 @@ const Display = function(width, height) {
     buffer.fillStyle = "#101010";
     buffer.fillRect(0, 0, buffer.canvas.width, buffer.canvas.height);
 
-    if (currentWorldState !== undefined){
-      a++;
-      var xx = Math.round(40+40*Math.sin(a/30))
-      var yy = Math.round(40+40*Math.cos(a/30))
+    tileMaps.putLayer(
+      buffer,
+      currentWorldState.SceneName,
+      "Layer1",
+      Math.round(camera.x-buffer.canvas.width/2),Math.round(camera.y-buffer.canvas.height/2),
+      0,0,
+      buffer.canvas.width,buffer.canvas.height);
 
-      tileMaps.putLayer(buffer,currentWorldState.SceneName,"Layer1",0,0,xx,yy,200,200);
-      tileMaps.putLayer(buffer,currentWorldState.SceneName,"Layer2",0,0,xx,yy,200,200);
-    }
+    tileMaps.putLayer(
+      buffer,
+      currentWorldState.SceneName,
+      "Layer2",
+      Math.round(camera.x-buffer.canvas.width/2),Math.round(camera.y-buffer.canvas.height/2),
+      0,0,
+      buffer.canvas.width,buffer.canvas.height);
+
+    tileMaps.putLayer(
+      buffer,
+      currentWorldState.SceneName,
+      "Layer3",
+      Math.round(camera.x-buffer.canvas.width/2),Math.round(camera.y-buffer.canvas.height/2),
+      0,0,
+      buffer.canvas.width,buffer.canvas.height);
 
     buffer.strokeStyle = "white"
     buffer.lineWidth = 1
@@ -58,9 +80,21 @@ const Display = function(width, height) {
 
   };
 
+  function updateCamera(){
+    if (camera !== undefined){
+      var player = currentWorldState.Players[playerId]
+      camera.x = camera.x+(player.X-camera.x)*0.1
+      camera.y = camera.y+(player.Y-camera.y)*0.1
+    }
+  }
+
+
   function render() {
-    renderScene();
-    renderHero();
+    if (currentWorldState !== undefined && camera !== undefined && playerId !== undefined){
+      updateCamera();
+      renderScene();
+      renderPlayers();
+    }
 
     context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
   };
@@ -85,10 +119,16 @@ const Display = function(width, height) {
   this.handleResize = (event) => { this.resize(event); };
   window.addEventListener("resize",  this.handleResize);
 
+
   this.applyNewState = function(playerId_, worldState_) {
-    console.log("apply new state")
+    //console.log("apply new state")
     playerId = playerId_;
     currentWorldState = worldState_;
+
+    if (camera === undefined){
+      camera = {'x':currentWorldState.Players[playerId].X, 'y':currentWorldState.Players[playerId].Y}
+    }
+
   }
 
 }

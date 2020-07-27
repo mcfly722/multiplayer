@@ -11,11 +11,11 @@ import (
 
 // Player struct
 type Player struct {
-	SpriteSetNum int     `json:"SpriteSetNum"`
-	X            float32 `json:"X"`
-	Y            float32 `json:"Y"`
-	SpeedX       float32 `json:"SpeedX"`
-	SpeedY       float32 `json:"SpeedY"`
+	SpriteSetNum int
+	X            float32
+	Y            float32
+	SpeedX       float32
+	SpeedY       float32
 }
 
 // World - protected with mutex world
@@ -58,8 +58,8 @@ func (world *World) JoinNewPlayer() int {
 
 	world.Players[world.lastPlayerID] = Player{
 		SpriteSetNum: rand.Intn(2),
-		X:            (float32)(rand.Intn(200) - 100),
-		Y:            (float32)(rand.Intn(200) - 100),
+		X:            50 * 32,
+		Y:            50 * 32,
 		SpeedX:       0,
 		SpeedY:       0}
 
@@ -76,16 +76,16 @@ func (world *World) ApplyPlayerMovement(playerID int, movement Movement) {
 
 	if player, ok := world.Players[playerID]; ok {
 		if movement.ArrowUp {
-			player.SpeedY = -1
+			player.SpeedY = -4
 		}
 		if movement.ArrowDown {
-			player.SpeedY = 1
+			player.SpeedY = 4
 		}
 		if movement.ArrowLeft {
-			player.SpeedX = -1
+			player.SpeedX = -4
 		}
 		if movement.ArrowRight {
-			player.SpeedX = 1
+			player.SpeedX = 4
 		}
 
 		if (!movement.ArrowUp) && (!movement.ArrowDown) {
@@ -103,6 +103,7 @@ func (world *World) ApplyPlayerMovement(playerID int, movement Movement) {
 
 // Play - update world
 func (world *World) Play() {
+
 	world.playersMux.Lock()
 
 	for id, player := range world.Players {

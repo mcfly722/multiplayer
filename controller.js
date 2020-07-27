@@ -2,6 +2,8 @@ import $ from 'jquery';
 
 function Controller(token) {
 
+  var token;
+
   this.token = token;
 
   var actualKeys = {

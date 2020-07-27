@@ -21,13 +21,13 @@ function Game() {
       controller = new Controller(token);
       display = new Display(480, 300);
       display.resize();
-      setInterval(update, 1000);
+      setInterval(update, 1000/60);
       reloginRequired = false;
     });
   }
 
   setInterval(checkThatLogined, 1000);
-  
+
   function checkThatLogined(){
       if (reloginRequired){
         login();
