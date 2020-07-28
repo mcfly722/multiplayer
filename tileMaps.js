@@ -9,6 +9,28 @@ const TileMaps = function() {
 
   var scenes = {};
 
+  this.getScene = function(sceneName){
+    if (sceneName in scenes) {
+      if(scenes[sceneName].ready) {
+        return scenes[sceneName].scene
+      }
+    }
+    return null
+  }
+
+  this.loadScene = function(sceneName){
+    if (!(sceneName in scenes)){
+      $.ajax({
+        url: sceneName
+      }).done(function(data) {
+        scenes[sceneName].scene = data;
+        scenes[sceneName].ready = true;
+      });
+      scenes[sceneName] = {ready:false}
+      console.log("start to load "+sceneName)
+    }
+  }
+
   this.putLayer = function(ctx,scene,layerName,sx,sy,dx,dy,w,h){
     if (scene in scenes) {
       if(scenes[scene].ready) {
@@ -29,35 +51,24 @@ const TileMaps = function() {
                 l['decompressedData']=strData;
                 console.log("layer:"+l.name+" decompressed")
               } else {
-                console.log("unknown compression format '"+l.compression+"' for layer "+l.name+" in "+scene+" not found")
+                if(l.compression !== undefined){
+                  console.log("unknown compression format '"+l.compression+"' for layer "+l.name+" in "+scene+" not found")
+                }
               }
             }
 
             if (l.hasOwnProperty("decompressedData")){
-
               var sx1 = Math.floor(sx/s.tilewidth)
               var sy1 = Math.floor(sy/s.tileheight)
               var sx2 = Math.floor((sx+w)/s.tilewidth)
               var sy2 = Math.floor((sy+h)/s.tileheight)
-
-              //console.log("put sx1="+sx1+" sy1="+sy1+" sx2="+sx2+" sy2="+sy2);
-
               for(var ix = sx1;ix<=sx2;ix++){
                 for(var iy = sy1;iy<=sy2;iy++){
-
                   var tile_n = (l['decompressedData'])[iy*l.width+ix]-1
                   var tile_ix = tile_n % tileSet.columns
                   var tile_iy = Math.floor(tile_n/tileSet.columns)
-
-
                   var tile_ax1 = sx - sx1*s.tilewidth
                   var tile_ay1 = sy - sy1*s.tileheight
-
-
-
-                  //function(ctx,imageSrc,sx,sy,dx,dy,w,h)
-
-
                   images.putImage(ctx,tileSet.image,
                     tile_ix * s.tilewidth,
                     tile_iy * s.tileheight,
@@ -65,32 +76,38 @@ const TileMaps = function() {
                     dy+(iy-sy1)*s.tileheight-tile_ay1,
                     s.tilewidth,
                     s.tileheight)
-
-                    //images.putImage(ctx,'tileset1.png',0,0,0,0,200,200)
-                    //console.log(" ix="+ix+" iy="+iy+" tile_n="+tile_n+ " tile_ix="+tile_ix+" tile_iy="+tile_iy+" tile_ax1="+tile_ax1+" tile_ay1="+tile_ay1+"  tileSet="+tileSet.image + " putted");
-
                 }
               }
-
-
-
-
-
-
             }
-            //console.log("put layer:"+l.name)
 
+            if(l.objects !== undefined){
+              l.objects.forEach(obj => {
+                if(obj.polygon !== undefined){
+
+                  ctx.beginPath();
+                  ctx.moveTo(obj.x+obj.polygon[0].x-sx, obj.y+obj.polygon[0].y-sy);
+
+                  obj.polygon.forEach(line=>{
+                    ctx.lineTo(obj.x+line.x-sx, obj.y+line.y-sy);
+                  })
+
+                  ctx.lineTo(obj.x-sx, obj.y-sy);
+                  ctx.strokeStyle = "red"
+                  ctx.lineWidth = 2
+                  ctx.stroke();
+
+                } else {
+                  ctx.strokeStyle = "blue"
+                  ctx.lineWidth = 2
+                  ctx.strokeRect(obj.x-sx,obj.y-sy,obj.width,obj.height);
+                }
+              });
+            }
           }
         });
       }
     } else {
-      $.ajax({
-        url: scene,
-      }).done(function(data) {
-        scenes[scene].scene = data;
-        scenes[scene].ready = true;
-      });
-      scenes[scene] = {ready:false}
+      this.loadScene(scene);
     }
   }
 

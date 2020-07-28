@@ -50,29 +50,29 @@ const Display = function(width, height) {
     buffer.fillStyle = "#101010";
     buffer.fillRect(0, 0, buffer.canvas.width, buffer.canvas.height);
 
-    tileMaps.putLayer(
-      buffer,
-      currentWorldState.SceneName,
-      "Layer1",
-      Math.round(camera.x-buffer.canvas.width/2),Math.round(camera.y-buffer.canvas.height/2),
-      0,0,
-      buffer.canvas.width,buffer.canvas.height);
+    tileMaps.loadScene(currentWorldState.SceneName);
 
-    tileMaps.putLayer(
-      buffer,
-      currentWorldState.SceneName,
-      "Layer2",
-      Math.round(camera.x-buffer.canvas.width/2),Math.round(camera.y-buffer.canvas.height/2),
-      0,0,
-      buffer.canvas.width,buffer.canvas.height);
+    var scene = tileMaps.getScene(currentWorldState.SceneName);
+    if (scene != null) {
+      scene.layers.
+      //filter(layer => layer.visible == true).
+      forEach(layer => {
 
-    tileMaps.putLayer(
-      buffer,
-      currentWorldState.SceneName,
-      "Layer3",
-      Math.round(camera.x-buffer.canvas.width/2),Math.round(camera.y-buffer.canvas.height/2),
-      0,0,
-      buffer.canvas.width,buffer.canvas.height);
+        tileMaps.putLayer(
+          buffer,
+          currentWorldState.SceneName,
+          layer.name,
+          Math.round(camera.x-buffer.canvas.width/2),Math.round(camera.y-buffer.canvas.height/2),
+          0,0,
+          buffer.canvas.width,buffer.canvas.height);
+
+          if (layer.name == 'Main') {
+            renderPlayers();
+          }
+
+      });
+    }
+
 
     buffer.strokeStyle = "white"
     buffer.lineWidth = 1
@@ -93,7 +93,6 @@ const Display = function(width, height) {
     if (currentWorldState !== undefined && camera !== undefined && playerId !== undefined){
       updateCamera();
       renderScene();
-      renderPlayers();
     }
 
     context.drawImage(buffer.canvas, 0, 0, buffer.canvas.width, buffer.canvas.height, 0, 0, context.canvas.width, context.canvas.height);
