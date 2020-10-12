@@ -37,10 +37,20 @@ const Display = function(width, height) {
       var player = currentWorldState.Players[playerId]
       var spriteSetNum = player.SpriteSetNum;
 
+      var pos = {x:Math.round(player.X-camera.x+buffer.canvas.width/2),y:Math.round(player.Y-camera.y+buffer.canvas.height/2)}
       images.putImage(buffer,'player'+spriteSetNum+'.png',
         0,0,
-        Math.round(player.X-camera.x+buffer.canvas.width/2),Math.round(player.Y-camera.y+buffer.canvas.height/2),
+        pos.x - 16,pos.y -28,
         32,32)
+
+        buffer.beginPath();
+        buffer.strokeStyle = "red"
+        //buffer.fillStyle = "red"
+        buffer.lineWidth = 2
+        buffer.arc(
+          pos.x,pos.y,
+          5, 0, 2 * Math.PI);
+        buffer.stroke();
     }
   }
 

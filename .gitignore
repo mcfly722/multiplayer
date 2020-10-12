@@ -1,4 +1,5 @@
 node_modules/
 static/index.html
 static/index_bundle_*.js
+static/g_files/**
 package-lock.json

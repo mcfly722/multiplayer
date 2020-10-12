@@ -4,18 +4,25 @@ import (
 	"encoding/json"
 	"math/rand"
 	"sync"
+
+	"github.com/ByteArena/box2d"
 )
 
 // RPG Maker sprites
 // https://www.deviantart.com/rpg-maker-artists/gallery/25208345/RPG-Maker-Sprites
 
+// PixelsPerMeter for box2d
+const PixelsPerMeter = 20.0
+const PlayersSpeed = 6.0
+
 // Player struct
 type Player struct {
 	SpriteSetNum int
-	X            float32
-	Y            float32
-	SpeedX       float32
-	SpeedY       float32
+	X            float64
+	Y            float64
+	SpeedX       float64
+	SpeedY       float64
+	box2dBody    *box2d.B2Body
 }
 
 // World - protected with mutex world
@@ -25,6 +32,7 @@ type World struct {
 	Players      map[int]Player
 	playersMux   sync.Mutex
 	lastPlayerID int
+	box2dWorld   *box2d.B2World
 }
 
 // Movement - pressed buttons on client
@@ -39,9 +47,14 @@ type Movement struct {
 // NewWorld constructor
 func NewWorld(sceneFileName string) (*World, error) {
 
-	var safeWorld = World{Players: make(map[int]Player)}
+	box2dWorld := box2d.MakeB2World(box2d.MakeB2Vec2(0, 0))
+
+	var safeWorld = World{
+		Players:    make(map[int]Player),
+		box2dWorld: &box2dWorld}
+
 	safeWorld.SceneName = sceneFileName
-	scene, err := NewScene(sceneFileName)
+	scene, err := NewScene(sceneFileName, safeWorld.box2dWorld)
 	if err != nil {
 		return nil, err
 	}
@@ -56,12 +69,37 @@ func (world *World) JoinNewPlayer() int {
 
 	world.playersMux.Lock()
 
-	world.Players[world.lastPlayerID] = Player{
+	shape := box2d.MakeB2CircleShape()
+	shape.M_radius = 5.0 / PixelsPerMeter
+
+	fd := box2d.MakeB2FixtureDef()
+	fd.Shape = &shape
+	fd.Density = 1
+	fd.Restitution = 0
+	fd.Friction = 0
+	fd.Filter = box2d.MakeB2Filter()
+
+	bd := box2d.MakeB2BodyDef()
+	bd.Position.Set(50*32/PixelsPerMeter, 50*32/PixelsPerMeter)
+	bd.Type = box2d.B2BodyType.B2_dynamicBody
+	bd.FixedRotation = true
+	bd.AllowSleep = false
+
+	body := world.box2dWorld.CreateBody(&bd)
+	body.CreateFixtureFromDef(&fd)
+
+	player := Player{
 		SpriteSetNum: rand.Intn(2),
-		X:            50 * 32,
-		Y:            50 * 32,
+		X:            0,
+		Y:            0,
 		SpeedX:       0,
-		SpeedY:       0}
+		SpeedY:       0,
+	}
+	player.box2dBody = body
+
+	//	player.box2dBody.SetUserData(world.lastPlayerID)
+
+	world.Players[world.lastPlayerID] = player
 
 	world.lastPlayerID++
 
@@ -76,16 +114,16 @@ func (world *World) ApplyPlayerMovement(playerID int, movement Movement) {
 
 	if player, ok := world.Players[playerID]; ok {
 		if movement.ArrowUp {
-			player.SpeedY = -4
+			player.SpeedY = -PlayersSpeed
 		}
 		if movement.ArrowDown {
-			player.SpeedY = 4
+			player.SpeedY = PlayersSpeed
 		}
 		if movement.ArrowLeft {
-			player.SpeedX = -4
+			player.SpeedX = -PlayersSpeed
 		}
 		if movement.ArrowRight {
-			player.SpeedX = 4
+			player.SpeedX = PlayersSpeed
 		}
 
 		if (!movement.ArrowUp) && (!movement.ArrowDown) {
@@ -94,21 +132,32 @@ func (world *World) ApplyPlayerMovement(playerID int, movement Movement) {
 		if (!movement.ArrowLeft) && (!movement.ArrowRight) {
 			player.SpeedX = 0
 		}
+
+		player.box2dBody.SetLinearVelocity(box2d.MakeB2Vec2(player.SpeedX, player.SpeedY))
 		world.Players[playerID] = player
 	}
-
 	world.playersMux.Unlock()
-
 }
 
 // Play - update world
 func (world *World) Play() {
-
 	world.playersMux.Lock()
 
+	timeStep := 1.0 / 60.0
+	velocityIterations := 10
+	positionIterations := 10
+
+	world.box2dWorld.Step(timeStep, velocityIterations, positionIterations)
+
 	for id, player := range world.Players {
-		player.X += player.SpeedX
-		player.Y += player.SpeedY
+		var position = player.box2dBody.GetPosition()
+		//		log.Printf("%v -(%v,%v)", id, position.X, position.Y)
+
+		// players inertia
+		player.box2dBody.SetLinearVelocity(box2d.MakeB2Vec2(player.SpeedX, player.SpeedY))
+
+		player.X = position.X * PixelsPerMeter
+		player.Y = position.Y * PixelsPerMeter
 		world.Players[id] = player
 	}
 
